@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>КАНАЛ ШТАБА · Сосик</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#070B14;--panel:#0E1626;--panel-edge:#1B2942;--frost:#5BE8E0;--frost-dim:#2E6B68;
+    --steel:#8FA3C0;--steel-dim:#4A5C7A;--amber:#FFB347;--danger:#FF4D5E;--ok:#5BE8E0;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;height:100%;}
+  body{background:radial-gradient(120% 80% at 50% -10%,#0d1a2e 0%,var(--bg) 55%),var(--bg);
+    color:var(--steel);font-family:"Space Mono",monospace;overflow:hidden;-webkit-user-select:none;user-select:none;}
+  body::after{content:"";position:fixed;inset:0;pointer-events:none;opacity:.06;
+    background:repeating-linear-gradient(0deg,#fff 0 1px,transparent 1px 3px);}
+  .app{position:relative;height:100%;display:flex;flex-direction:column;
+    padding:16px 16px calc(16px + env(safe-area-inset-bottom));max-width:480px;margin:0 auto;}
+  .bar{display:flex;justify-content:space-between;align-items:center;
+    font-size:11px;letter-spacing:1.5px;color:var(--steel-dim);text-transform:uppercase;}
+  .bar .live{display:flex;align-items:center;gap:6px;color:var(--frost);}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--frost);box-shadow:0 0 8px var(--frost);animation:pulse 1.6s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+  .thaw{margin-top:12px;}
+  .thaw .lab{display:flex;justify-content:space-between;font-size:11px;letter-spacing:1px;
+    text-transform:uppercase;color:var(--steel-dim);margin-bottom:5px;}
+  .thaw .lab b{color:var(--amber);font-weight:700;}
+  .meter{height:6px;border-radius:3px;background:#10203a;overflow:hidden;border:1px solid var(--panel-edge);}
+  .meter > i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--frost),var(--amber));transition:width .9s linear;}
+  .screen{flex:1;display:flex;flex-direction:column;margin:14px 0;min-height:0;}
+  .panel{background:linear-gradient(180deg,var(--panel),#0a1120);border:1px solid var(--panel-edge);
+    border-radius:16px;padding:18px 16px;position:relative;overflow:hidden;display:flex;flex-direction:column;flex:1;min-height:0;}
+  .panel::before{content:"";position:absolute;inset:0;border-radius:16px;box-shadow:inset 0 0 60px rgba(91,232,224,.04);pointer-events:none;}
+  .eyebrow{font-size:11px;letter-spacing:3px;color:var(--frost-dim);text-transform:uppercase;margin-bottom:10px;}
+  .headline{font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:28px;line-height:1.02;
+    letter-spacing:.5px;color:#EAF4FF;text-transform:uppercase;margin:0 0 10px;}
+
+  #boot{font-size:12.5px;line-height:1.95;color:var(--frost-dim);}
+  #boot .l{opacity:0;animation:fadein .25s forwards;}
+  #boot .l b{color:var(--frost);} #boot .l .err{color:var(--danger);} #boot .l .am{color:var(--amber);}
+  @keyframes fadein{to{opacity:1}}
+  .cursor{display:inline-block;width:8px;height:14px;background:var(--frost);vertical-align:-2px;animation:blink 1s steps(2) infinite;margin-left:2px;}
+  @keyframes blink{50%{opacity:0}}
+
+  .chathead{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+  .ava{width:38px;height:38px;border-radius:50%;flex:none;
+    background:radial-gradient(circle at 35% 30%,#2bbcb4,#0c3f3c);display:flex;align-items:center;justify-content:center;
+    font-size:20px;box-shadow:0 0 14px rgba(91,232,224,.25);}
+  .chathead .who{font-family:"Saira Condensed",sans-serif;font-weight:700;color:#EAF4FF;font-size:17px;letter-spacing:1px;line-height:1;}
+  .chathead .role{font-size:10px;letter-spacing:2px;color:var(--frost-dim);text-transform:uppercase;margin-top:3px;}
+  .feed{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:9px;padding-right:2px;}
+  .feed::-webkit-scrollbar{width:0;}
+  .bub{max-width:88%;background:#11203a;border:1px solid var(--panel-edge);border-radius:4px 14px 14px 14px;
+    padding:9px 12px;font-size:13px;line-height:1.5;color:#D7E4F5;opacity:0;transform:translateY(6px);animation:bub .3s forwards;}
+  .bub b{color:var(--frost);}
+  .bub.you{align-self:flex-end;background:#10302e;border-color:var(--frost-dim);border-radius:14px 4px 14px 14px;color:#CFEFEC;}
+  .bub.mir{font-family:"Space Mono";letter-spacing:1px;color:#9fd;}
+  @keyframes bub{to{opacity:1;transform:none}}
+  .typing{display:inline-flex;gap:4px;align-items:center;}
+  .typing i{width:6px;height:6px;border-radius:50%;background:var(--frost-dim);animation:tp 1s infinite;}
+  .typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+  @keyframes tp{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+  .cta{margin-top:12px;width:100%;height:50px;border:none;border-radius:13px;flex:none;
+    background:linear-gradient(180deg,var(--frost),#2bbcb4);color:#06201e;font-family:"Saira Condensed",sans-serif;
+    font-weight:700;font-size:18px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;opacity:0;animation:fadein .4s forwards;}
+  .cta:active{transform:scale(.98);}
+  .cta.ghost{background:transparent;border:1px solid var(--frost-dim);color:var(--frost);}
+
+  .act{flex:1;display:flex;flex-direction:column;justify-content:center;text-align:center;}
+  .act .big-emo{font-size:46px;margin-bottom:10px;}
+  .act p{font-size:14px;line-height:1.6;color:var(--steel);margin:0 14px;}
+  .act p b{color:var(--frost);}
+
+  .msg{font-size:12.5px;line-height:1.55;color:var(--steel);margin-bottom:4px;}
+  .msg b{color:var(--frost);}
+  .code-row{display:flex;gap:8px;justify-content:center;margin:14px 0 6px;}
+  .cell{flex:1;max-width:60px;height:60px;border:1px solid var(--panel-edge);border-radius:12px;background:#0a1322;
+    display:flex;align-items:center;justify-content:center;font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:32px;color:#EAF4FF;transition:.15s;}
+  .cell.fill{border-color:var(--frost-dim);box-shadow:0 0 14px rgba(91,232,224,.18);}
+  .hint{text-align:center;font-size:11.5px;letter-spacing:.5px;color:var(--steel-dim);min-height:18px;line-height:1.3;padding:0 4px;}
+  .hint.bad{color:var(--danger);}
+  .pad{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:12px;}
+  .key{height:54px;border-radius:12px;border:1px solid var(--panel-edge);background:linear-gradient(180deg,#12203a,#0c1628);
+    color:#DCE8F7;font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:25px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.08s;}
+  .key:active{transform:scale(.95);border-color:var(--frost-dim);box-shadow:0 0 16px rgba(91,232,224,.2);}
+  .key.alt{font-size:12px;letter-spacing:1px;color:var(--steel);font-family:"Space Mono",monospace;}
+  .key.go{background:linear-gradient(180deg,var(--frost),#2bbcb4);color:#06201e;border-color:transparent;}
+  .shake{animation:shake .4s;}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-9px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(4px)}}
+
+  #seq{font-size:13px;line-height:2;color:var(--frost-dim);text-align:center;padding:20px 0;}
+  #seq b{color:var(--frost);} #seq .am{color:var(--amber);}
+
+  .reveal{text-align:center;flex:1;display:flex;flex-direction:column;justify-content:center;}
+  .reveal .seal{font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:14px;letter-spacing:4px;color:var(--ok);text-transform:uppercase;margin-bottom:8px;}
+  .reveal .big{font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:38px;line-height:.98;color:#EAF4FF;
+    text-transform:uppercase;margin:6px 0 14px;text-shadow:0 0 24px rgba(91,232,224,.35);}
+  .gearcard{border:1px solid var(--frost-dim);border-radius:14px;background:rgba(91,232,224,.06);padding:16px;margin:0 4px 14px;text-align:left;}
+  .gearcard .gn{font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:24px;letter-spacing:1px;color:#EAF4FF;text-transform:uppercase;}
+  .gearcard .gs{font-size:10px;letter-spacing:2px;color:var(--frost-dim);text-transform:uppercase;margin:2px 0 10px;}
+  .gearcard ul{margin:0;padding-left:18px;font-size:12.5px;line-height:1.7;color:var(--steel);}
+  .gearcard ul b{color:var(--frost);}
+  .sova-line{font-size:13px;line-height:1.5;color:#CFEFEC;background:#10302e;border:1px solid var(--frost-dim);
+    border-radius:4px 14px 14px 14px;padding:10px 12px;text-align:left;max-width:92%;margin:0 auto 12px;}
+  .sova-line b{color:var(--frost);}
+  .order{display:inline-block;border:1px solid var(--frost-dim);border-radius:14px;padding:14px 18px;background:rgba(91,232,224,.06);font-size:13.5px;line-height:1.5;color:var(--steel);}
+  .order b{color:var(--frost);font-size:20px;display:block;margin-top:4px;font-family:"Saira Condensed",sans-serif;letter-spacing:1px;}
+  .frostflash{position:fixed;inset:0;background:radial-gradient(circle at 50% 50%,rgba(91,232,224,.5),transparent 60%);opacity:0;pointer-events:none;}
+  .frostflash.go{animation:flash 1s ease-out;}
+  @keyframes flash{0%{opacity:0}15%{opacity:1}100%{opacity:0}}
+  /* surveillance video */
+  .cctv{flex:1;display:flex;flex-direction:column;min-height:0;}
+  .cctv .topline{display:flex;justify-content:space-between;font-size:10px;letter-spacing:1.5px;
+    color:var(--danger);text-transform:uppercase;margin-bottom:8px;}
+  .cctv .topline .rec{display:flex;align-items:center;gap:5px;}
+  .cctv .topline .rec i{width:8px;height:8px;border-radius:50%;background:var(--danger);animation:pulse 1.2s infinite;}
+  .vidwrap{position:relative;flex:1;min-height:0;border:1px solid var(--panel-edge);border-radius:12px;
+    overflow:hidden;background:#000;display:flex;align-items:center;justify-content:center;}
+  .vidwrap video{width:100%;height:100%;object-fit:cover;filter:contrast(1.1) saturate(.85);}
+  .vidwrap .scan{position:absolute;inset:0;pointer-events:none;opacity:.12;
+    background:repeating-linear-gradient(0deg,#fff 0 1px,transparent 1px 4px);}
+  .vidwrap .corner{position:absolute;font-size:10px;letter-spacing:1px;color:#7dffd6;font-family:"Space Mono";text-shadow:0 0 4px #000;}
+  .vidwrap .c-tl{top:8px;left:10px;} .vidwrap .c-br{bottom:8px;right:10px;}
+  .vidwrap .tapplay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    background:rgba(0,0,0,.45);color:#fff;font-family:"Saira Condensed";font-weight:700;font-size:20px;letter-spacing:1px;cursor:pointer;}
+  .footer{font-size:10px;letter-spacing:2px;color:var(--steel-dim);text-align:center;text-transform:uppercase;}
+  .hidden{display:none!important;}
+</style>
+</head>
+<body>
+<div class="frostflash" id="flash"></div>
+<div class="app">
+  <div class="bar"><span>КАНАЛ · ШИФР AES-256</span><span class="live"><span class="dot"></span>ШТАБ НА СВЯЗИ</span></div>
+  <div class="thaw">
+    <div class="lab"><span id="thawLab">Целостность груза</span><span><b id="thawPct">100%</b></span></div>
+    <div class="meter"><i id="thawBar"></i></div>
+  </div>
+  <div class="screen"><div class="panel" id="stage"></div></div>
+  <div class="footer" id="foot">Агент Сосик · уровень допуска: ВЫСШИЙ</div>
+</div>
+
+<script>
+/* ===================================================================
+   НАСТРОЙКА КВЕСТА
+   =================================================================== */
+const CFG = {
+  callsign: "Сосик",
+  code: "45",          // ← ТВОЙ КОД: лапы плюша у часов + 5 (букв в «Сосик»)
+  thawSeconds: 240,    // косметический таймер таяния, не блокирует
+  videoUrl: "unlock.mp4", // ← клип после кода (залей в тот же репозиторий). Пусто "" = без видео
+};
+/* Персонажи — можешь менять имена/эмодзи под своих плюшей */
+const CHARS = {
+  sova: {name:"СОВА", role:"Куратор · сектор «Холод»", emoji:"🦉"},
+  lapa: {name:"ЛАПА", role:"Агент · точка «Часы»",     emoji:"🧸"},
+  izum: {name:"ИЗЮМ", role:"Двойной агент",            emoji:"🐰"},
+};
+/* Сценарий: всё, что говорят персонажи. Правь спокойно. */
+const SCENES = [
+  { type:"chat", who:"sova", msgs:[
+      "Сосик, ты живая. А я уж ставки делала. 🦉",
+      "Слушай и не перебивай — канал держится на честном слове.",
+      "В морозилке лежит <b>холодный груз</b>. Стратегический. И он тает прямо сейчас.",
+      "К нему ведут трое наших. Каждый оставил тебе <b>секрет</b> — открытым текстом мы не пишем.",
+      "Первый ждёт <b>у часов</b>. Дойди и нажми, когда будешь рядом."
+    ], you:"Принято. Веди.", btn:"📍 Я у часов" },
+
+  { type:"chat", who:"lapa", msgs:[
+      "Тихо. Это я, агент ЛАПА. 🧸",
+      "Рядом со мной — записка. Только она <b>пустая</b>. Так и задумано.",
+      "Это тайнопись. Прогрей бумагу — над лампой, феном или батареей. Проступит <b>первая цифра</b>.",
+      "И ещё… запомни фразу. Повторять не буду: <i>«чёртова дюжина легла на стол»</i>. Не спрашивай зачем.",
+      "Всё. Теперь — к <b>зеркалу</b>."
+    ], you:"Поняла, грею.", btn:"📍 Я у зеркала" },
+
+  { type:"chat", who:"sova", msgs:[
+      "Зеркало — точка двойных агентов. Тут всё <b>наоборот</b>.",
+      "Записку у зеркала читай только в <b>отражении</b> — иначе бессмыслица.",
+      "Она скажет, где спит наш следующий человек. Сделай, как написано."
+    ], you:"Читаю в зеркале.", btn:"📍 Я у кровати" },
+
+  { type:"chat", who:"izum", msgs:[
+      "…м-м? А, это ты. 🐰",
+      "Признаюсь сразу: я работаю на две стороны. Так интереснее. 😈",
+      "Вторую цифру просто так не отдам. Но половину ты уже слышала — мишка же бубнил тебе про <i>чёртову дюжину</i>? 😏",
+      "Лови вторую половину: <i>«…а счастливая восьмёрка её обобрала»</i>. Сложи обе фразы — что осталось, то и есть цифра.",
+      "А если застрянешь… ответ спрятан <b>там, где хранятся секретные мечты</b>. Уж ты знаешь это место. 🤫",
+      "И не только ответ. Там тебя ждёт <b>наводка</b> на финал. Но это позже.",
+      "Собрала весь код? Живо к <b>морозилке</b>. Груз тает, а я спать хочу."
+    ], you:"Разгадала. Иду.", btn:"▶ Ввести код" },
+
+  { type:"code" },
+
+  { type:"chat", who:"sova", phase2head:true, msgs:[
+      "Чисто сработано. Я почти горжусь. 🦉",
+      "Ты ведь прочла <b>послание на самом грузе</b>? Тогда знаешь — это была лишь разминка.",
+      "За идеальную работу штаб выдаёт снаряжение, которое получает только <b>элита сети</b>.",
+      "Где оно спрятано — я не скажу открытым каналом. Но <b>наводку</b> ты уже видела: там, где хранятся секретные мечты.",
+      "Возвращайся к ней, прочти до конца — и иди, куда указано. Возьми свет."
+    ], you:"Поняла. Выдвигаюсь.", btn:"📍 Я нашла снаряжение" },
+
+  { type:"gear" },
+];
+
+/* ===================================================================
+   ДВИЖОК (трогать не обязательно)
+   =================================================================== */
+const TG = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+if (TG){ try{ TG.ready(); TG.expand(); TG.setHeaderColor("#070B14"); TG.setBackgroundColor("#070B14"); }catch(e){} }
+function haptic(t){ try{ if(TG&&TG.HapticFeedback){ if(t==="ok")TG.HapticFeedback.notificationOccurred("success"); else if(t==="err")TG.HapticFeedback.notificationOccurred("error"); else TG.HapticFeedback.impactOccurred("light"); } }catch(e){} }
+const stage=document.getElementById('stage');
+let idx=0, solved=false, thawStarted=false;
+
+/* BOOT */
+const bootLines=[
+  ['> подключение к узлу ШТАБ-7…',500],['> рукопожатие… <b>OK</b>',1000],
+  ['> дешифровка канала… <b>OK</b>',1600],['> сверка отпечатка агента…',2200],
+  ['> <b>СОСИК. ЛИЧНОСТЬ ПОДТВЕРЖДЕНА.</b>',2900],
+  ['> сканирование тайника… <span class="am">обнаружен ХОЛОДНЫЙ ГРУЗ</span>',3600],
+  ['> <span class="err">! груз нестабилен, идёт таяние</span>',4300],
+  ['> вызываю куратора<span class="cursor"></span>',4900],
+];
+function boot(){
+  stage.innerHTML='<div class="eyebrow">Установка защищённого соединения</div><div id="boot"></div>';
+  const b=document.getElementById('boot');
+  bootLines.forEach(([h,d])=>setTimeout(()=>{const e=document.createElement('div');e.className='l';e.innerHTML=h;b.appendChild(e);haptic("tap");},d));
+  setTimeout(play,5700);
+}
+function play(){
+  const s=SCENES[idx];
+  if(!s)return;
+  if(s.type==="chat") renderChat(s);
+  else if(s.type==="code") renderCode();
+  else if(s.type==="gear") renderGear();
+}
+function advance(){ idx++; play(); }
+
+/* CHAT scene */
+function renderChat(s){
+  if(!thawStarted){thawStarted=true;startThaw();}
+  const c=CHARS[s.who];
+  stage.innerHTML=`<div class="chathead"><div class="ava">${c.emoji}</div>
+    <div><div class="who">${c.name}</div><div class="role">${c.role}</div></div></div>
+    <div class="feed" id="feed"></div>`;
+  const feed=document.getElementById('feed');
+  let i=0;
+  const step=()=>{
+    if(i>=s.msgs.length){ showReply(); return; }
+    const t=document.createElement('div'); t.className='bub'; t.innerHTML='<span class="typing"><i></i><i></i><i></i></span>';
+    feed.appendChild(t); feed.scrollTop=feed.scrollHeight;
+    setTimeout(()=>{
+      t.innerHTML=s.msgs[i]; haptic("tap"); feed.scrollTop=feed.scrollHeight; i++;
+      setTimeout(step, 600 + Math.min((s.msgs[i-1]||'').length*12, 1300));
+    }, 650 + Math.random()*450);
+  };
+  const showReply=()=>{
+    if(s.you){ const me=document.createElement('div'); me.className='bub you'; me.textContent=s.you; feed.appendChild(me); feed.scrollTop=feed.scrollHeight; }
+    const btn=document.createElement('button'); btn.className='cta'; btn.textContent=s.btn||'▶ Дальше';
+    btn.onclick=()=>{haptic("tap");advance();};
+    stage.appendChild(btn);
+  };
+  setTimeout(step,400);
+}
+
+/* THAW */
+function startThaw(){
+  const bar=document.getElementById('thawBar'),pct=document.getElementById('thawPct'),start=Date.now();
+  const t=setInterval(()=>{
+    if(solved){clearInterval(t);return;}
+    const p=Math.max(0,100-((Date.now()-start)/1000/CFG.thawSeconds)*100);
+    bar.style.width=p+'%'; pct.textContent=Math.round(p)+'%';
+    if(p<=0){pct.textContent='КРИТ';pct.style.color='#FF4D5E';clearInterval(t);}
+  },1000);
+}
+
+/* CODE scene */
+let entry="",fails=0;
+const taunts=[
+  "🦉 СОВА: Мимо. Груз тает, а ты угадываешь?",
+  "🦉 СОВА: Нет. И кто тебя только в сеть брал…",
+  "🦉 СОВА: Опять не то. Лапы посчитала? Буквы в позывном?",
+  "🦉 СОВА: Сосик, соберись. Это не экзамен по вождению.",
+  "🦉 СОВА: Ещё одна такая попытка — и я всё расскажу штабу."
+];
+function renderCode(){
+  const N=CFG.code.length;
+  stage.innerHTML=`<div class="eyebrow">Замок холодного тайника</div>
+    <div class="headline">Код<br>разблокировки</div>
+    <div class="msg">Первая цифра — <b>лапы агента ЛАПА</b>. Вторая — <b>букв в позывном «${CFG.callsign}»</b>.</div>
+    <div class="code-row">${Array.from({length:N}).map((_,i)=>`<div class="cell" id="c${i}"></div>`).join('')}</div>
+    <div class="hint" id="hint">Ожидание ввода…</div>
+    <div class="pad" id="pad">
+      <button class="key">1</button><button class="key">2</button><button class="key">3</button>
+      <button class="key">4</button><button class="key">5</button><button class="key">6</button>
+      <button class="key">7</button><button class="key">8</button><button class="key">9</button>
+      <button class="key alt" data-act="clear">СБРОС</button><button class="key">0</button>
+      <button class="key go" data-act="go">▶</button></div>`;
+  entry="";
+  const hint=document.getElementById('hint');
+  const cells=Array.from({length:N},(_,i)=>document.getElementById('c'+i));
+  const render=()=>cells.forEach((c,i)=>{c.textContent=entry[i]||'';c.classList.toggle('fill',!!entry[i]);});
+  const reset=m=>{entry="";render();if(m)hint.textContent=m;};
+  document.getElementById('pad').onclick=(e)=>{
+    const b=e.target.closest('button'); if(!b)return; const act=b.dataset.act; haptic("tap");
+    if(act==="clear"){reset('Сброшено');hint.classList.remove('bad');return;}
+    if(act==="go"){submit();return;}
+    if(entry.length>=N)return;
+    entry+=b.textContent.trim(); hint.classList.remove('bad'); hint.textContent='…'; render();
+    if(entry.length===N)submit();
+  };
+  const submit=()=>{
+    if(entry.length<N){hint.textContent='Нужно '+N+' цифры';return;}
+    if(entry===CFG.code){unlock();}
+    else{haptic("err");stage.classList.add('shake');setTimeout(()=>stage.classList.remove('shake'),420);
+      reset();hint.textContent=taunts[Math.min(fails,taunts.length-1)];hint.classList.add('bad');fails++;}
+  };
+}
+
+/* UNLOCK (freezer) — decrypt seq → surveillance video → reveal → button */
+function unlock(){
+  solved=true; haptic("ok");
+  document.getElementById('thawBar').style.width='100%';
+  const pct=document.getElementById('thawPct'); pct.textContent='ИЗВЛЕЧЕНИЕ'; pct.style.color='#5BE8E0';
+  stage.innerHTML='<div class="eyebrow">Код принят</div><div id="seq"></div>';
+  const d=document.getElementById('seq');
+  [['> снятие криптозамка… <b>OK</b>',300],['> отключение сигнализации… <b>OK</b>',1000],
+   ['> <span class="am">перехват камеры тайника…</span>',1700],['> <b>СИГНАЛ ПОЛУЧЕН</b>',2400]]
+   .forEach(([h,t])=>setTimeout(()=>{const e=document.createElement('div');e.innerHTML=h;d.appendChild(e);haptic("tap");},t));
+  setTimeout(()=>{ if(CFG.videoUrl) playVideo(); else showReveal(); },3100);
+}
+
+/* Surveillance clip: toys carrying the груз into the freezer */
+function playVideo(){
+  stage.innerHTML=`<div class="cctv">
+    <div class="topline"><span>КАМ-04 · ТАЙНИК «ХОЛОД»</span><span class="rec"><i></i>ПЕРЕХВАТ</span></div>
+    <div class="vidwrap">
+      <video id="vid" playsinline muted autoplay preload="auto" src="${CFG.videoUrl}"></video>
+      <div class="tapplay hidden" id="tapplay">▶ ВОСПРОИЗВЕСТИ ПЕРЕХВАТ</div>
+    </div></div>`;
+  const v=document.getElementById('vid'), tp=document.getElementById('tapplay');
+  const cont=document.createElement('button'); cont.className='cta ghost'; cont.textContent='Пропустить ⏭';
+  cont.onclick=()=>{haptic("tap");showReveal();};
+  stage.appendChild(cont);
+  v.onended=()=>{haptic("ok");showReveal();};
+  v.onerror=()=>{showReveal();}; // нет файла → не ломаем квест
+  const p=v.play();
+  if(p&&p.catch){ p.catch(()=>{ tp.classList.remove('hidden'); tp.onclick=()=>{tp.classList.add('hidden');v.play();}; }); }
+}
+
+/* Freezer reveal + "Груз извлечён" button */
+function showReveal(){
+  document.getElementById('flash').classList.add('go');
+  setTimeout(()=>{
+    stage.innerHTML=`<div class="reveal">
+      <div class="seal">/// ДОСТУП РАЗРЕШЁН ///</div>
+      <div class="big">Груз<br>разблокирован</div>
+      <div class="sova-line">🦉 <b>СОВА:</b> Видела? Вот куда эти проныры его утащили. Открой морозилку, достань груз — и <b>прочти, что нацарапано на нём</b>. Потом уничтожь улику: <b>съешь, не торопясь</b>.</div>
+      <div class="order">Приказ штаба:<b>Открой морозилку 🧊</b></div>
+    </div>`;
+    const btn=document.createElement('button'); btn.className='cta'; btn.textContent='✅ Груз извлечён';
+    btn.onclick=()=>{haptic("ok");advance();};
+    stage.appendChild(btn);
+  },700);
+}
+
+/* GEAR (final — the mask) */
+function renderGear(){
+  document.getElementById('thawLab').textContent='Статус миссии';
+  const pct=document.getElementById('thawPct'); pct.textContent='ФАЗА 2'; pct.style.color='#5BE8E0';
+  stage.innerHTML='<div class="eyebrow">Выдача снаряжения</div><div id="seq"></div>';
+  const d=document.getElementById('seq');
+  [['> авторизация уровня ВЫСШИЙ… <b>OK</b>',300],['> вскрытие спецхранилища… <b>OK</b>',1100],
+   ['> <span class="am">распаковка изделия «ЗАТМЕНИЕ»…</span>',1900],['> <b>СНАРЯЖЕНИЕ ГОТОВО</b>',2700]]
+   .forEach(([h,t])=>setTimeout(()=>{const e=document.createElement('div');e.innerHTML=h;d.appendChild(e);haptic("tap");},t));
+  setTimeout(()=>{
+    document.getElementById('flash').classList.add('go'); haptic("ok");
+    setTimeout(()=>{
+      stage.innerHTML=`<div class="reveal" style="overflow-y:auto">
+        <div class="seal">/// ЭЛИТНЫЙ ДОПУСК ///</div>
+        <div class="big">Снаряжение<br>выдано</div>
+        <div class="gearcard">
+          <div class="gn">«ЗАТМЕНИЕ»</div>
+          <div class="gs">Тактический сенсор-блок · последнее поколение</div>
+          <ul>
+            <li><b>Блокировка света</b> — ни одна вспышка тебя не засветит</li>
+            <li><b>Глушение звука и сигналов</b> — внешний мир выключается</li>
+            <li><b>Режим восстановления</b> — так работает только элита</li>
+          </ul>
+        </div>
+        <div class="sova-line">🦉 <b>СОВА:</b> Надень. Почувствуй разницу между обычным агентом и тобой. Добро пожаловать в высшую лигу, ${CFG.callsign}. Конец связи. 🌙</div>
+      </div>`;
+      document.getElementById('foot').textContent='Миссия завершена · агент Сосик';
+    },700);
+  },3400);
+}
+
+boot();
+</script>
+</body>
+</html>
